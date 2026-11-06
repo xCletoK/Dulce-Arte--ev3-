@@ -1,0 +1,48 @@
+{% extends 'dulce_arte/base.html' %}
+{% block titulo %}Panel – Dulce Arte{% endblock %}
+{% block contenido %}
+<h2 style="font-size:1.15rem; font-weight:600; margin-bottom:1.25rem;">Panel general</h2>
+
+<div class="stats">
+    <div class="stat">
+        <div class="stat-value">{{ total_pedidos }}</div>
+        <div class="stat-label">Pedidos totales</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value">{{ pendientes_bom }}</div>
+        <div class="stat-label">Sin descontar BOM</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value">{{ en_cocina }}</div>
+        <div class="stat-label">En cocina</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value">{{ listos }}</div>
+        <div class="stat-label">Listos para despacho</div>
+    </div>
+</div>
+
+{% if insumos_bajo %}
+<div class="card">
+    <h3 class="card-title">Insumos con stock bajo</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Insumo</th>
+                <th>Stock actual</th>
+                <th>Mínimo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in insumos_bajo %}
+            <tr>
+                <td>{{ i.nombre }}</td>
+                <td><span class="badge badge-danger">{{ i.stock_actual }} {{ i.unidad_medida }}</span></td>
+                <td>{{ i.stock_minimo }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

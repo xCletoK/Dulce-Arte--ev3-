@@ -1,0 +1,129 @@
+{% extends 'dulce_arte/base.html' %}
+{% block titulo %}Gestionar Despacho Pedido #{{ despacho.pedido.id }} – Dulce Arte{% endblock %}
+{% block contenido %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+        <h2 class="card-title" style="margin-bottom:0;">Gestionar Entrega Pedido #{{ despacho.pedido.id }}</h2>
+        <a href="{% url 'rutas_despacho_html' %}" class="btn btn-outline btn-sm">Volver a Despachos</a>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Tipo de Entrega</label>
+                {{ form.tipo_entrega }}
+            </div>
+            <div class="form-group" id="group_repartidor">
+                <label>Repartidor Asignado</label>
+                {{ form.repartidor }}
+            </div>
+            <div class="form-group" id="group_direccion">
+                <label>Dirección de Entrega</label>
+                {{ form.direccion_entrega }}
+            </div>
+            <div class="form-group">
+                <label>Estado del Despacho</label>
+                {{ form.estado }}
+            </div>
+            <div class="form-group">
+                <label>Fecha / Hora de Entrega</label>
+                {{ form.fecha_despacho }}
+            </div>
+            
+            <div class="form-group" style="grid-column: 1 / -1; margin-top: 1rem;">
+                <label>Firma Digital de Recepción</label>
+                {% if despacho.comprobante_firma %}
+                    <div style="margin-bottom: 0.8rem;">
+                        <span style="font-size: 0.82rem; color: var(--muted);">Firma registrada previamente:</span><br>
+                        <img src="{{ despacho.comprobante_firma.url }}" alt="Firma registrada" style="max-height: 90px; border: 1px solid var(--border); border-radius: 6px; background: #fff; padding: 4px; margin-top: 4px;">
+                    </div>
+                {% endif %}
+                <div style="border: 1px solid var(--border); border-radius: 8px; background: #fff; display: inline-block;">
+                    <canvas id="signature-pad" width="450" height="180" style="touch-action: none; cursor: crosshair; display: block;"></canvas>
+                </div>
+                <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+                    <button type="button" id="btn-clear-signature" class="btn btn-outline btn-sm">Limpiar firma</button>
+                </div>
+                <input type="hidden" name="firma_base64" id="id_firma_base64">
+            </div>
+        </div>
+
+        <div style="margin-top: 1.2rem; display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn btn-primary">Actualizar Despacho</button>
+            <a href="{% url 'rutas_despacho_html' %}" class="btn btn-outline">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectTipo = document.getElementById('id_tipo_entrega');
+        const selectRepartidor = document.getElementById('id_repartidor');
+        const inputDireccion = document.getElementById('id_direccion_entrega');
+        const groupRepartidor = document.getElementById('group_repartidor');
+        const groupDireccion = document.getElementById('group_direccion');
+
+        function toggleCampos() {
+            if (selectTipo.value === 'RETIRO_LOCAL') {
+                groupRepartidor.style.display = 'none';
+                groupDireccion.style.display = 'none';
+                selectRepartidor.value = '';
+                inputDireccion.value = 'Retiro en local';
+            } else {
+                groupRepartidor.style.display = 'flex';
+                groupDireccion.style.display = 'flex';
+                if (inputDireccion.value === 'Retiro en local') {
+                    inputDireccion.value = '';
+                }
+            }
+        }
+
+        selectTipo.addEventListener('change', toggleCampos);
+        toggleCampos();
+
+        // Firma Canvas
+        const canvas = document.getElementById('signature-pad');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#2a2118';
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function startDraw(e) { drawing = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
+        function moveDraw(e) { if (!drawing) return; const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
+        function stopDraw() { drawing = false; }
+
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', moveDraw);
+        canvas.addEventListener('mouseup', stopDraw);
+        canvas.addEventListener('mouseleave', stopDraw);
+
+        canvas.addEventListener('touchstart', startDraw, {passive: true});
+        canvas.addEventListener('touchmove', moveDraw, {passive: true});
+        canvas.addEventListener('touchend', stopDraw);
+
+        document.getElementById('btn-clear-signature').addEventListener('click', function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('id_firma_base64').value = '';
+        });
+
+        canvas.closest('form').addEventListener('submit', function() {
+            const blank = document.createElement('canvas');
+            blank.width = canvas.width;
+            blank.height = canvas.height;
+            if (canvas.toDataURL() !== blank.toDataURL()) {
+                document.getElementById('id_firma_base64').value = canvas.toDataURL('image/png');
+            }
+        });
+    });
+</script>
+{% endblock %}

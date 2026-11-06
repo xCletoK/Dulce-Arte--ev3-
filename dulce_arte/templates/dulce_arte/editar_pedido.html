@@ -1,0 +1,153 @@
+{% extends 'dulce_arte/base.html' %}
+{% block titulo %}Editar Pedido #{{ pedido.id }} – Dulce Arte{% endblock %}
+{% block contenido %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+        <h2 class="card-title" style="margin-bottom:0;">Editar Pedido #{{ pedido.id }}</h2>
+        <a href="{% url 'gestion_pedidos_html' %}" class="btn btn-outline btn-sm">Volver a Pedidos</a>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.monto_abonado }}
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Cliente</label>
+                {{ form.cliente }}
+            </div>
+            <div class="form-group">
+                <label>Producto base</label>
+                {{ form.producto_base }}
+            </div>
+            <div class="form-group">
+                <label>Cantidad de Unidades</label>
+                {{ form.cantidad }}
+            </div>
+            <div class="form-group">
+                <label>Fecha y hora de entrega</label>
+                {{ form.fecha_entrega }}
+            </div>
+            <div class="form-group">
+                <label>Tipo de Entrega</label>
+                {{ form.tipo_entrega }}
+            </div>
+            <div class="form-group" id="group_direccion_pedido" style="display:none;">
+                <label>Dirección de Entrega</label>
+                {{ form.direccion_entrega }}
+            </div>
+            <div class="form-group">
+                <label>Total Calculado ($) <small style="color:var(--muted); font-weight:normal;">(Autocalculado)</small></label>
+                {{ form.total }}
+            </div>
+            <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end;">
+                <button type="button" id="btn_toggle_abono" class="btn btn-outline" style="width: 100%; height: 38px; font-weight: 600;">
+                    ⚡ Aplicar Abono 50%
+                </button>
+            </div>
+        </div>
+
+        <div id="resumen_pago_info" style="margin-top: 0.8rem; padding: 0.6rem 0.85rem; border-radius: 6px; background: var(--surface); border: 1px solid var(--border); font-size: 0.88rem; display: none;"></div>
+
+        <div class="form-group" style="margin-top:1rem;">
+            <label>Especificaciones de diseño e ingredientes</label>
+            {{ form.especificaciones_diseno }}
+        </div>
+        <div style="margin-top: 1.2rem; display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            <a href="{% url 'gestion_pedidos_html' %}" class="btn btn-outline">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectTipo = document.getElementById('id_tipo_entrega_pedido');
+    const groupDireccion = document.getElementById('group_direccion_pedido');
+    const inputDireccion = document.getElementById('id_direccion_pedido');
+
+    function toggleDireccion() {
+        if (selectTipo && selectTipo.value === 'DOMICILIO') {
+            groupDireccion.style.display = 'flex';
+        } else if (groupDireccion) {
+            groupDireccion.style.display = 'none';
+        }
+    }
+
+    if (selectTipo && groupDireccion) {
+        selectTipo.addEventListener('change', toggleDireccion);
+        toggleDireccion();
+    }
+
+    const preciosProductos = {
+        {% for p in productos %}
+            "{{ p.id }}": {{ p.precio_base|stringformat:"f" }},
+        {% endfor %}
+    };
+
+    const selectProducto = document.getElementById('id_producto_base');
+    const inputCantidad = document.getElementById('id_cantidad');
+    const inputTotal = document.getElementById('id_total');
+    const inputAbono = document.getElementById('id_monto_abonado');
+    const btnAbono = document.getElementById('btn_toggle_abono');
+    const resumenInfo = document.getElementById('resumen_pago_info');
+
+    let abonoActivo = false;
+
+    if (inputAbono && parseFloat(inputAbono.value) > 0) {
+        abonoActivo = true;
+    }
+
+    function recalcularFormulario() {
+        if (!selectProducto || !inputCantidad || !inputTotal || !inputAbono) return;
+
+        const prodId = selectProducto.value;
+        const cant = Math.max(1, parseFloat(inputCantidad.value) || 1);
+
+        let totalCalculado = 0;
+        if (prodId && preciosProductos[prodId] !== undefined) {
+            totalCalculado = Math.round(preciosProductos[prodId] * cant);
+        }
+
+        inputTotal.value = totalCalculado;
+
+        if (abonoActivo) {
+            const montoAbonado = Math.round(totalCalculado / 2);
+            inputAbono.value = montoAbonado;
+            const saldo = totalCalculado - montoAbonado;
+
+            btnAbono.style.background = '#dcfce7';
+            btnAbono.style.borderColor = '#16a34a';
+            btnAbono.style.color = '#15803d';
+            btnAbono.innerHTML = '✓ Abono 50% Aplicado ($' + montoAbonado.toLocaleString('es-CL') + ')';
+
+            if (resumenInfo) {
+                resumenInfo.style.display = 'block';
+                resumenInfo.innerHTML = '💳 <strong>Abono 50% Activado:</strong> Pago inicial registrado por <strong>$' + montoAbonado.toLocaleString('es-CL') + '</strong>. Saldo pendiente al entregar: <strong>$' + saldo.toLocaleString('es-CL') + '</strong>';
+            }
+        } else {
+            inputAbono.value = 0;
+            btnAbono.style.background = '';
+            btnAbono.style.borderColor = '';
+            btnAbono.style.color = '';
+            btnAbono.innerHTML = '⚡ Aplicar Abono 50%';
+
+            if (resumenInfo) {
+                resumenInfo.style.display = 'none';
+                resumenInfo.innerHTML = '';
+            }
+        }
+    }
+
+    if (btnAbono) {
+        btnAbono.addEventListener('click', function() {
+            abonoActivo = !abonoActivo;
+            recalcularFormulario();
+        });
+    }
+
+    if (selectProducto) selectProducto.addEventListener('change', recalcularFormulario);
+    if (inputCantidad) inputCantidad.addEventListener('input', recalcularFormulario);
+
+    recalcularFormulario();
+});
+</script>
+{% endblock %}

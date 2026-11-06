@@ -1,0 +1,35 @@
+{% extends 'dulce_arte/base.html' %}
+{% block titulo %}Nuevo Cliente – Dulce Arte{% endblock %}
+{% block contenido %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+        <h2 class="card-title" style="margin-bottom:0;">Registrar nuevo cliente</h2>
+        <a href="{% url 'gestion_pedidos_html' %}" class="btn btn-outline btn-sm">Volver a Pedidos</a>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Nombre completo</label>
+                {{ form.nombre }}
+            </div>
+            <div class="form-group">
+                <label>Teléfono</label>
+                {{ form.telefono }}
+            </div>
+            <div class="form-group">
+                <label>Correo electrónico</label>
+                {{ form.email }}
+            </div>
+        </div>
+        <div class="form-group" style="margin-top:1rem;">
+            <label>Notas / Observaciones del cliente</label>
+            {{ form.notas }}
+        </div>
+        <div style="margin-top: 1.2rem; display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn btn-primary">Guardar cliente</button>
+            <a href="{% url 'gestion_pedidos_html' %}" class="btn btn-outline">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

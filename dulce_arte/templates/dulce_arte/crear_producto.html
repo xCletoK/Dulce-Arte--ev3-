@@ -1,0 +1,24 @@
+{% extends 'dulce_arte/base.html' %}
+{% block titulo %}Nuevo Producto Base – Dulce Arte{% endblock %}
+{% block contenido %}
+<div class="card" style="max-width: 520px; margin: 0 auto;">
+    <h2 class="card-title">Crear Producto Base</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group" style="margin-bottom:1rem;">
+            <label>Nombre del producto</label>
+            {{ form.nombre }}
+        </div>
+        <div class="form-group" style="margin-bottom:1rem;">
+            <label>Descripción</label>
+            {{ form.descripcion }}
+        </div>
+        <div class="form-group" style="margin-bottom:1.4rem;">
+            <label>Precio Base ($)</label>
+            {{ form.precio_base }}
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Producto</button>
+        <a href="{% url 'inventario_bom_html' %}" class="btn btn-outline">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

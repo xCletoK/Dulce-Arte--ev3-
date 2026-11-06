@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}Dulce Arte{% endblock %}</title>
+    <style>
+        :root {
+            --bg: #f3efe9;
+            --surface: #fffcf7;
+            --text: #2a2118;
+            --muted: #7a6e63;
+            --border: #e4dcd2;
+            --primary: #3d2b1f;
+            --primary-hover: #2a1d14;
+            --accent: #a35c2a;
+            --accent-soft: #f3e0d0;
+            --success: #2f5d3a;
+            --danger: #8b2e2e;
+            --radius: 10px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Georgia", "Times New Roman", serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.55;
+            font-size: 15.5px;
+        }
+
+        /* Usamos sans solo para interfaz */
+        .sans, nav, .btn, table, .badge, .stat-label, .form-group label, .kanban-col-title {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        /* Navbar */
+        .navbar {
+            background: var(--primary);
+            color: #f8f1e9;
+            padding: 0 1.75rem;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px solid var(--accent);
+        }
+        .navbar-brand {
+            font-family: Georgia, serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.15rem;
+        }
+        .navbar-nav a {
+            color: #d4c4b0;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.84rem;
+            font-weight: 500;
+        }
+        .navbar-nav a:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.08);
+        }
+        .navbar-nav .user-info {
+            color: #b9a898;
+            font-size: 0.78rem;
+            margin-left: 0.9rem;
+            padding-left: 0.9rem;
+            border-left: 1px solid #5c4033;
+        }
+
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 2rem 1.25rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.6rem 1.7rem;
+            margin-bottom: 1.4rem;
+            box-shadow: 0 1px 2px rgba(42, 33, 24, 0.04);
+        }
+        .card-title {
+            font-family: Georgia, serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            color: var(--primary);
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1.1rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .form-group label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .form-control {
+            padding: 0.55rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            font-size: 0.92rem;
+            background: #fff;
+            font-family: inherit;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(163, 92, 42, 0.12);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.48rem 1rem;
+            border: none;
+            border-radius: 7px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #f8f1e9;
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-accent {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-accent:hover { background: #8a4c22; }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover { background: #f0e9e0; }
+        .btn-sm {
+            padding: 0.3rem 0.7rem;
+            font-size: 0.78rem;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+        th {
+            text-align: left;
+            padding: 0.7rem 0.8rem;
+            background: #f0e9e0;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid var(--border);
+        }
+        td {
+            padding: 0.75rem 0.8rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.18rem 0.55rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+        .badge-ok { background: #e1f0e4; color: var(--success); }
+        .badge-warn { background: var(--accent-soft); color: var(--accent); }
+        .badge-danger { background: #f5e0e0; color: var(--danger); }
+        .badge-neutral { background: #ebe5dc; color: #5c5349; }
+
+        /* Alerts */
+        .alert {
+            padding: 0.8rem 1.1rem;
+            border-radius: 8px;
+            margin-bottom: 1.2rem;
+            font-size: 0.9rem;
+        }
+        .alert-success {
+            background: #eef7f0;
+            color: var(--success);
+            border: 1px solid #c5e0cb;
+        }
+        .alert-error {
+            background: #f9ecec;
+            color: var(--danger);
+            border: 1px solid #e8c5c5;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.75rem;
+        }
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.15rem 1.2rem;
+        }
+        .stat-value {
+            font-family: Georgia, serif;
+            font-size: 1.65rem;
+            font-weight: 600;
+            color: var(--primary);
+            letter-spacing: -0.02em;
+        }
+        .stat-label {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 0.2rem;
+            font-weight: 500;
+        }
+
+        /* Kanban */
+        .kanban {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.85rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+        .kanban-col {
+            background: #ebe5dc;
+            border-radius: var(--radius);
+            padding: 0.85rem;
+            min-width: 175px;
+            min-height: 440px;
+        }
+        .kanban-col-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            margin-bottom: 0.85rem;
+            padding-bottom: 0.55rem;
+            border-bottom: 2px solid #d6ccc0;
+        }
+        .kanban-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.8rem;
+            margin-bottom: 0.65rem;
+            font-size: 0.86rem;
+        }
+        .kanban-card-id {
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            color: var(--primary);
+        }
+        .kanban-card-meta {
+            color: var(--muted);
+            font-size: 0.78rem;
+            margin-bottom: 0.6rem;
+            line-height: 1.4;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 1.8rem 0.8rem;
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        @media (max-width: 920px) {
+            .kanban { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <header class="navbar">
+        <a href="{% url 'dashboard' %}" class="navbar-brand">Dulce Arte</a>
+        <nav class="navbar-nav">
+            <a href="{% url 'dashboard' %}">Panel</a>
+            <a href="{% url 'gestion_pedidos_html' %}">Pedidos</a>
+            <a href="{% url 'kanban_cocina_html' %}">Cocina</a>
+            <a href="{% url 'inventario_bom_html' %}">Bodega</a>
+            <a href="{% url 'rutas_despacho_html' %}">Despachos</a>
+            <a href="/admin/" target="_blank">Admin</a>
+            <span class="user-info">{{ user.username }}</span>
+            <a href="{% url 'logout' %}">Salir</a>
+        </nav>
+    </header>
+    {% endif %}
+
+    <main class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        {% block contenido %}{% endblock %}
+    </main>
+</body>
+</html>

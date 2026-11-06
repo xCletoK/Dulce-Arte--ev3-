@@ -1,0 +1,72 @@
+<div class="kanban" id="tablero-kanban">
+    
+    <!-- RECIBIDO -->
+    <div class="kanban-col">
+        <div class="kanban-col-title">Recibido</div>
+        {% for p in recibidos %}
+        <div class="kanban-card">
+            <div class="kanban-card-id">#{{ p.id }} – {{ p.cliente.nombre }}</div>
+            <div class="kanban-card-meta">
+                <strong>Entrega:</strong> {{ p.fecha_entrega|date:"d/m H:i" }}<br>
+                {% if not p.abono_suficiente %}<span class="badge badge-danger">Abono &lt; 50%</span><br>{% endif %}
+                {% if not p.bom_descontado %}<span class="badge badge-warn">BOM pendiente</span>{% endif %}
+            </div>
+            <button hx-post="{% url 'htmx_cambiar_estado_kanban' p.id %}" hx-vals='{"dir": "avanzar"}' hx-target="#tablero-kanban" hx-swap="outerHTML" class="btn btn-primary btn-sm" style="width:100%;">Avanzar &rarr;</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- EN PREPARACIÓN -->
+    <div class="kanban-col">
+        <div class="kanban-col-title">En preparación</div>
+        {% for p in preparacion %}
+        <div class="kanban-card">
+            <div class="kanban-card-id">#{{ p.id }} – {{ p.cliente.nombre }}</div>
+            <div style="display:flex; gap:0.3rem;">
+                <button hx-post="{% url 'htmx_cambiar_estado_kanban' p.id %}" hx-vals='{"dir": "retroceder"}' hx-target="#tablero-kanban" hx-swap="outerHTML" class="btn btn-outline btn-sm">&larr;</button>
+                <button hx-post="{% url 'htmx_cambiar_estado_kanban' p.id %}" hx-vals='{"dir": "avanzar"}' hx-target="#tablero-kanban" hx-swap="outerHTML" class="btn btn-primary btn-sm" style="flex:1;">Avanzar &rarr;</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- HORNEADO / DECORADO -->
+    <div class="kanban-col">
+        <div class="kanban-col-title">Horneado / Decorado</div>
+        {% for p in horneados %}
+        <div class="kanban-card">
+            <div class="kanban-card-id">#{{ p.id }} – {{ p.cliente.nombre }}</div>
+            <div style="display:flex; gap:0.3rem;">
+                <button hx-post="{% url 'htmx_cambiar_estado_kanban' p.id %}" hx-vals='{"dir": "retroceder"}' hx-target="#tablero-kanban" hx-swap="outerHTML" class="btn btn-outline btn-sm">&larr;</button>
+                <button hx-post="{% url 'htmx_cambiar_estado_kanban' p.id %}" hx-vals='{"dir": "avanzar"}' hx-target="#tablero-kanban" hx-swap="outerHTML" class="btn btn-primary btn-sm" style="flex:1;">Avanzar &rarr;</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- CONTROL CALIDAD -->
+    <div class="kanban-col">
+        <div class="kanban-col-title">Control calidad</div>
+        {% for p in calidad %}
+        <div class="kanban-card">
+            <div class="kanban-card-id">#{{ p.id }} – {{ p.cliente.nombre }}</div>
+            <div style="display:flex; gap:0.3rem;">
+                <button hx-post="{% url 'htmx_cambiar_estado_kanban' p.id %}" hx-vals='{"dir": "retroceder"}' hx-target="#tablero-kanban" hx-swap="outerHTML" class="btn btn-outline btn-sm">&larr;</button>
+                <button hx-post="{% url 'htmx_cambiar_estado_kanban' p.id %}" hx-vals='{"dir": "avanzar"}' hx-target="#tablero-kanban" hx-swap="outerHTML" class="btn btn-success btn-sm" style="flex:1;">Listo &check;</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- LISTO -->
+    <div class="kanban-col">
+        <div class="kanban-col-title">Listo</div>
+        {% for p in listos %}
+        <div class="kanban-card">
+            <div class="kanban-card-id">#{{ p.id }} – {{ p.cliente.nombre }}</div>
+            <button hx-post="{% url 'htmx_cambiar_estado_kanban' p.id %}" hx-vals='{"dir": "retroceder"}' hx-target="#tablero-kanban" hx-swap="outerHTML" class="btn btn-outline btn-sm" style="width:100%;">&larr; Devolver</button>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>

@@ -1,0 +1,53 @@
+{% extends 'dulce_arte/base.html' %}
+{% block titulo %}Despachos – Dulce Arte{% endblock %}
+{% block contenido %}
+<div class="card">
+    <h2 class="card-title">Rutas de despacho</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Pedido</th>
+                <th>Producto</th>
+                <th>Dirección</th>
+                <th>Repartidor</th>
+                <th>Estado</th>
+                <th>Firma / Comprobante</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in despachos %}
+            <tr>
+                <td><strong>#{{ d.pedido.id }}</strong></td>
+                <td>{{ d.pedido.producto_base.nombre|default:"—" }}</td>
+                <td>{{ d.direccion_entrega }}</td>
+                <td>{{ d.repartidor.username|default:"Sin asignar" }}</td>
+                <td>
+                    {% if d.estado == 'ENTREGADO' %}
+                        <span class="badge badge-ok">{{ d.get_estado_display }}</span>
+                    {% elif d.estado == 'FALLIDO' %}
+                        <span class="badge badge-danger">{{ d.get_estado_display }}</span>
+                    {% else %}
+                        <span class="badge badge-warn">{{ d.get_estado_display }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if d.comprobante_firma %}
+                        <a href="{{ d.comprobante_firma.url }}" target="_blank" title="Clic para ampliar">
+                            <img src="{{ d.comprobante_firma.url }}" alt="Firma Pedido #{{ d.pedido.id }}" style="max-height: 40px; max-width: 110px; border: 1px solid var(--border); border-radius: 5px; background: #fff; padding: 2px; vertical-align: middle;">
+                        </a>
+                    {% else %}
+                        <span style="color:#a8a29e; font-size: 0.85rem;">Sin firma</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'editar_despacho_html' d.id %}" class="btn btn-primary btn-sm">Gestionar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="empty">No hay rutas de despacho.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

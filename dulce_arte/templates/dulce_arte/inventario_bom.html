@@ -1,0 +1,92 @@
+{% extends 'dulce_arte/base.html' %}
+{% block titulo %}Bodega – Dulce Arte{% endblock %}
+{% block contenido %}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+    <h2 style="font-size:1.15rem; font-weight:600; margin:0;">Bodega e Insumos</h2>
+    <div style="display:flex; gap:0.5rem;">
+        <a href="{% url 'crear_producto' %}" class="btn btn-outline btn-sm">+ Nuevo producto</a>
+        <a href="{% url 'crear_insumo' %}" class="btn btn-primary btn-sm">+ Nuevo insumo</a>
+        <a href="{% url 'crear_bom' %}" class="btn btn-accent btn-sm">+ Cargar Receta BOM</a>
+    </div>
+</div>
+
+<div class="card">
+    <h3 class="card-title">Stock de insumos</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Insumo</th>
+                <th>Stock actual</th>
+                <th>Mínimo</th>
+                <th>Unidad</th>
+                <th>Costo</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in insumos %}
+            <tr>
+                <td><strong>{{ i.nombre }}</strong></td>
+                <td>
+                    {% if i.stock_bajo %}
+                        <span class="badge badge-danger">{{ i.stock_actual }}</span>
+                    {% else %}
+                        {{ i.stock_actual }}
+                    {% endif %}
+                </td>
+                <td>{{ i.stock_minimo }}</td>
+                <td>{{ i.get_unidad_medida_display }}</td>
+                <td>${{ i.costo_unitario }}</td>
+                <td>
+                    <a href="{% url 'editar_insumo' i.id %}" class="btn btn-outline btn-sm">Editar stock</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="empty">No hay insumos. Crea el primero.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h3 class="card-title">Listas de materiales (BOM)</h3>
+    {% for p in productos %}
+        <details class="bom-accordion" style="margin-bottom: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: #fff; overflow: hidden;">
+            <summary style="padding: 0.75rem 1rem; font-weight: 600; cursor: pointer; background: #fdfbf7; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+                <span>📦 <strong>{{ p.nombre }}</strong> <small style="color: var(--muted); font-weight: normal; margin-left: 6px;">(${{ p.precio_base }})</small></span>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <a href="{% url 'editar_bom' p.id %}" onclick="event.stopPropagation();" class="btn btn-outline btn-sm" style="padding: 0.25rem 0.55rem; font-size: 0.75rem;">Editar Receta / Producto</a>
+                    <span class="badge badge-neutral" style="font-weight: 500;">
+                        {{ p.materiales_bom.all|length }} insumo(s)
+                    </span>
+                </div>
+            </summary>
+            <div style="padding: 0.85rem 1.25rem; border-top: 1px solid var(--border); background: var(--surface);">
+                {% if p.materiales_bom.all %}
+                    <table style="width: 100%; margin-top: 0.2rem;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 0.4rem 0.6rem;">Insumo</th>
+                                <th style="padding: 0.4rem 0.6rem;">Cantidad requerida</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in p.materiales_bom.all %}
+                            <tr>
+                                <td style="padding: 0.45rem 0.6rem;"><strong>{{ item.insumo.nombre }}</strong></td>
+                                <td style="padding: 0.45rem 0.6rem;">{{ item.cantidad_requerida }} {{ item.insumo.get_unidad_medida_display }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p style="color: var(--muted); font-size: 0.88rem; margin: 0.4rem 0;">Sin materiales asociados en la receta.</p>
+                {% endif %}
+            </div>
+        </details>
+    {% empty %}
+        <p class="empty">No hay productos con BOM.</p>
+    {% endfor %}
+</div>
+{% endblock %}

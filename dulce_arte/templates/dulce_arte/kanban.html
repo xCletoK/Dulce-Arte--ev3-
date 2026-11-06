@@ -1,0 +1,102 @@
+{% extends 'dulce_arte/base.html' %}
+{% block titulo %}Cocina – Dulce Arte{% endblock %}
+{% block contenido %}
+<h2 style="font-size:1.15rem; font-weight:600; margin-bottom:1.25rem;">Tablero de producción</h2>
+
+<div class="kanban">
+    <div class="kanban-col">
+        <div class="kanban-col-title">Recibido</div>
+        {% for p in recibidos %}
+        <div class="kanban-card">
+            <div class="kanban-card-id">Pedido #{{ p.id }} – {{ p.cliente.nombre }}</div>
+            <div class="kanban-card-meta">
+                <strong>{{ p.producto_base.nombre|default:"Personalizado" }}</strong> (x{{ p.cantidad }})<br>
+                <div style="color: #a35c2a; margin: 4px 0; font-size: 0.8rem; background: #fffcf7; padding: 4px 6px; border-radius: 4px; border: 1px solid #e4dcd2;">
+                    {{ p.especificaciones_diseno }}
+                </div>
+                <small style="color: #7a6e63;">Entrega: {{ p.fecha_entrega|date:"d/m H:i" }}</small>
+                {% if not p.bom_descontado %}<br><span class="badge badge-warn" style="margin-top: 4px;">BOM pendiente</span>{% endif %}
+            </div>
+            <a href="{% url 'cambiar_estado_kanban' p.id %}" class="btn btn-primary btn-sm">Avanzar</a>
+        </div>
+        {% empty %}
+        <div class="empty">Sin pedidos</div>
+        {% endfor %}
+    </div>
+
+    <div class="kanban-col">
+        <div class="kanban-col-title">En preparación</div>
+        {% for p in preparacion %}
+        <div class="kanban-card">
+            <div class="kanban-card-id">Pedido #{{ p.id }} – {{ p.cliente.nombre }}</div>
+            <div class="kanban-card-meta">
+                <strong>{{ p.producto_base.nombre|default:"Personalizado" }}</strong> (x{{ p.cantidad }})<br>
+                <div style="color: #a35c2a; margin: 4px 0; font-size: 0.8rem; background: #fffcf7; padding: 4px 6px; border-radius: 4px; border: 1px solid #e4dcd2;">
+                    {{ p.especificaciones_diseno }}
+                </div>
+                <small style="color: #7a6e63;">Entrega: {{ p.fecha_entrega|date:"d/m H:i" }}</small>
+            </div>
+            <a href="{% url 'cambiar_estado_kanban' p.id %}" class="btn btn-primary btn-sm">Avanzar</a>
+        </div>
+        {% empty %}
+        <div class="empty">Sin pedidos</div>
+        {% endfor %}
+    </div>
+
+    <div class="kanban-col">
+        <div class="kanban-col-title">Horneado / Decorado</div>
+        {% for p in horneados %}
+        <div class="kanban-card">
+            <div class="kanban-card-id">Pedido #{{ p.id }} – {{ p.cliente.nombre }}</div>
+            <div class="kanban-card-meta">
+                <strong>{{ p.producto_base.nombre|default:"Personalizado" }}</strong> (x{{ p.cantidad }})<br>
+                <div style="color: #a35c2a; margin: 4px 0; font-size: 0.8rem; background: #fffcf7; padding: 4px 6px; border-radius: 4px; border: 1px solid #e4dcd2;">
+                    {{ p.especificaciones_diseno }}
+                </div>
+                <small style="color: #7a6e63;">Entrega: {{ p.fecha_entrega|date:"d/m H:i" }}</small>
+            </div>
+            <a href="{% url 'cambiar_estado_kanban' p.id %}" class="btn btn-primary btn-sm">Avanzar</a>
+        </div>
+        {% empty %}
+        <div class="empty">Sin pedidos</div>
+        {% endfor %}
+    </div>
+
+    <div class="kanban-col">
+        <div class="kanban-col-title">Control calidad</div>
+        {% for p in calidad %}
+        <div class="kanban-card">
+            <div class="kanban-card-id">Pedido #{{ p.id }} – {{ p.cliente.nombre }}</div>
+            <div class="kanban-card-meta">
+                <strong>{{ p.producto_base.nombre|default:"Personalizado" }}</strong> (x{{ p.cantidad }})<br>
+                <div style="color: #a35c2a; margin: 4px 0; font-size: 0.8rem; background: #fffcf7; padding: 4px 6px; border-radius: 4px; border: 1px solid #e4dcd2;">
+                    {{ p.especificaciones_diseno }}
+                </div>
+                <small style="color: #7a6e63;">Entrega: {{ p.fecha_entrega|date:"d/m H:i" }}</small>
+            </div>
+            <a href="{% url 'cambiar_estado_kanban' p.id %}" class="btn btn-success btn-sm">Marcar listo</a>
+        </div>
+        {% empty %}
+        <div class="empty">Sin pedidos</div>
+        {% endfor %}
+    </div>
+
+    <div class="kanban-col">
+        <div class="kanban-col-title">Listo</div>
+        {% for p in listos %}
+        <div class="kanban-card">
+            <div class="kanban-card-id">Pedido #{{ p.id }} – {{ p.cliente.nombre }}</div>
+            <div class="kanban-card-meta">
+                <strong>{{ p.producto_base.nombre|default:"Personalizado" }}</strong> (x{{ p.cantidad }})<br>
+                <div style="color: #a35c2a; margin: 4px 0; font-size: 0.8rem; background: #fffcf7; padding: 4px 6px; border-radius: 4px; border: 1px solid #e4dcd2;">
+                    {{ p.especificaciones_diseno }}
+                </div>
+                <small style="color: #7a6e63;">Entrega: {{ p.fecha_entrega|date:"d/m H:i" }}</small>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty">Sin pedidos</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

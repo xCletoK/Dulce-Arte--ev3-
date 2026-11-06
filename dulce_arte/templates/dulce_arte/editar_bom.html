@@ -1,0 +1,138 @@
+{% extends 'dulce_arte/base.html' %}
+{% block titulo %}Editar Receta {{ producto.nombre }} – Dulce Arte{% endblock %}
+{% block contenido %}
+<div class="card" style="max-width: 680px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+        <h2 class="card-title" style="margin-bottom:0;">Editar Producto / Receta: {{ producto.nombre }}</h2>
+        <a href="{% url 'inventario_bom_html' %}" class="btn btn-outline btn-sm">Volver a Bodega</a>
+    </div>
+
+    <form method="post" id="bom-form">
+        {% csrf_token %}
+        
+        <!-- Sección 1: Datos Generales del Producto -->
+        <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem;">
+            Información del Producto Base
+        </h3>
+        <div class="form-grid" style="grid-template-columns: 2fr 1fr; margin-bottom: 1rem;">
+            <div class="form-group">
+                <label>Nombre de la Receta / Producto</label>
+                <input type="text" name="nombre_producto" class="form-control" value="{{ producto.nombre }}" required>
+            </div>
+            <div class="form-group">
+                <label>Precio Base ($)</label>
+                <input type="number" name="precio_base" class="form-control" step="500" min="0" value="{{ producto.precio_base }}" required>
+            </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label>Descripción / Observaciones</label>
+            <textarea name="descripcion_producto" class="form-control" rows="2">{{ producto.descripcion|default:'' }}</textarea>
+        </div>
+
+        <!-- Sección 2: Insumos Requeridos (BOM) -->
+        <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem;">
+            Insumos Requeridos por Unidad (BOM)
+        </h3>
+
+        <div id="insumos-container">
+            {% for item in materiales_actuales %}
+            <div class="form-grid insumo-row" style="grid-template-columns: 2fr 1fr auto; align-items: end; margin-bottom: 0.85rem; padding-bottom: 0.85rem; border-bottom: 1px dashed var(--border);">
+                <div class="form-group">
+                    <label>Insumo</label>
+                    <select name="insumos[]" class="form-control" required>
+                        <option value="">— Seleccionar Insumo —</option>
+                        {% for i in insumos %}
+                            <option value="{{ i.id }}" {% if i.id == item.insumo.id %}selected{% endif %}>
+                                {{ i.nombre }} ({{ i.get_unidad_medida_display }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cantidad</label>
+                    <input type="number" name="cantidades[]" class="form-control" step="0.01" min="0.01" value="{{ item.cantidad_requerida }}" required>
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn btn-outline btn-sm remove-row-btn" style="color: var(--danger); height: 38px; border-color: var(--border);">✕</button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="form-grid insumo-row" style="grid-template-columns: 2fr 1fr auto; align-items: end; margin-bottom: 0.85rem; padding-bottom: 0.85rem; border-bottom: 1px dashed var(--border);">
+                <div class="form-group">
+                    <label>Insumo</label>
+                    <select name="insumos[]" class="form-control" required>
+                        <option value="">— Seleccionar Insumo —</option>
+                        {% for i in insumos %}
+                            <option value="{{ i.id }}">{{ i.nombre }} ({{ i.get_unidad_medida_display }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cantidad</label>
+                    <input type="number" name="cantidades[]" class="form-control" step="0.01" min="0.01" placeholder="Ej: 250" required>
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn btn-outline btn-sm remove-row-btn" style="color: var(--danger); height: 38px; border-color: var(--border);">✕</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <button type="button" id="add-insumo-btn" class="btn btn-outline btn-sm">+ Agregar otro insumo</button>
+        </div>
+
+        <div style="display: flex; gap: 0.6rem;">
+            <button type="submit" class="btn btn-primary">Guardar Todo</button>
+            <a href="{% url 'inventario_bom_html' %}" class="btn btn-outline">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('insumos-container');
+    const addBtn = document.getElementById('add-insumo-btn');
+
+    const insumosOptions = `
+        <option value="">— Seleccionar Insumo —</option>
+        {% for i in insumos %}
+            <option value="{{ i.id }}">{{ i.nombre }} ({{ i.get_unidad_medida_display }})</option>
+        {% endfor %}
+    `;
+
+    addBtn.addEventListener('click', function() {
+        const row = document.createElement('div');
+        row.className = 'form-grid insumo-row';
+        row.style.cssText = 'grid-template-columns: 2fr 1fr auto; align-items: end; margin-bottom: 0.85rem; padding-bottom: 0.85rem; border-bottom: 1px dashed var(--border);';
+        row.innerHTML = `
+            <div class="form-group">
+                <label>Insumo</label>
+                <select name="insumos[]" class="form-control" required>
+                    ${insumosOptions}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Cantidad</label>
+                <input type="number" name="cantidades[]" class="form-control" step="0.01" min="0.01" placeholder="Ej: 100" required>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-outline btn-sm remove-row-btn" style="color: var(--danger); height: 38px; border-color: var(--border);">✕</button>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+
+    container.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-row-btn')) {
+            const rows = container.querySelectorAll('.insumo-row');
+            if (rows.length > 1) {
+                e.target.closest('.insumo-row').remove();
+            } else {
+                alert('La receta debe contener al menos un insumo.');
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
