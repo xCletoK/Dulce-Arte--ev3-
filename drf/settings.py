@@ -25,7 +25,7 @@ LOGGING = {
     },
 }
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*']
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -71,7 +71,7 @@ WSGI_APPLICATION = 'drf.wsgi.application'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
